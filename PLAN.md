@@ -1,251 +1,176 @@
-# Turbo-Disco Project Plan
+# Turbo-Disco: Clean Energy Grants Newsletter
 
-## Project Overview
+## What This Is
 
-**Turbo-Disco** is a blog and content creation platform focused on federal grants. The platform will serve as a resource hub for individuals and organizations seeking information about federal funding opportunities, grant writing guidance, and related content.
+A curated newsletter delivering clean energy and climate grant opportunities to subscribers. AI handles the data processing; you provide editorial judgment.
+
+**Platform**: Beehiiv (~$100/month)
+**Time commitment**: ~45 min/day
+**Niche**: Clean energy and climate grants (CFDA codes 81.xxx, specific EPA/USDA programs)
+
+---
+
+## Core Workflow
+
+```
+Grants.gov API → Python scripts → Filter by CFDA codes → Claude API drafts summaries → You review/edit → Beehiiv API publishes
+```
+
+### Daily Process
+
+1. **Automated**: Scripts pull new/updated grants from Grants.gov
+2. **Automated**: Filter to clean energy/climate programs
+3. **Automated**: Claude generates draft summaries (key dates, eligibility, amounts)
+4. **Manual (~30 min)**: Review drafts, add editorial insight, catch errors
+5. **Automated**: Publish to Beehiiv via API
 
 ---
 
 ## Target Audience
 
-- **Nonprofits** seeking federal funding for programs and initiatives
-- **Researchers & Academics** applying for research grants
-- **Small Businesses** looking for SBIR/STTR and other federal programs
-- **Government Contractors** interested in federal opportunities
-- **Grant Writers** seeking resources and best practices
-- **State & Local Governments** pursuing federal assistance
+Organizations pursuing clean energy and climate funding:
+- Clean energy startups
+- Environmental nonprofits
+- University research labs (climate science, renewable energy)
+- Municipal sustainability offices
+- Clean tech companies
+
+**Not** targeting: General nonprofits, all researchers, government contractors, etc.
 
 ---
 
-## Core Features
+## Development Phases
 
-### Phase 1: Foundation (MVP)
+### Phase 1: Data Pipeline (Week 1-3)
 
-1. **Blog/Content Management System**
-   - Article publishing with rich text editor
-   - Categories and tags for content organization
-   - Search functionality
-   - SEO-optimized page structure
+**Goal**: Reliably pull and filter grant data
 
-2. **Grant Information Hub**
-   - Curated federal grant resources
-   - Links to Grants.gov and SAM.gov
-   - Grant calendar/deadlines tracking
-   - Agency-specific grant pages (NIH, NSF, DOE, etc.)
+- [ ] Set up Grants.gov API access
+- [ ] Identify relevant CFDA codes (DOE 81.xxx, EPA climate programs, USDA rural energy)
+- [ ] Build Python script to fetch new/modified grants daily
+- [ ] Filter logic for clean energy relevance
+- [ ] Store results (simple JSON or SQLite)
 
-3. **Basic User Features**
-   - Newsletter subscription
-   - Contact form
-   - Social media sharing
+**Deliverable**: Script that outputs today's relevant grants as structured data
 
-### Phase 2: Enhanced Content
+### Phase 2: AI Summarization (Week 2-3)
 
-4. **Grant Writing Resources**
-   - Templates and sample documents
-   - Step-by-step guides
-   - Checklists for grant applications
-   - Glossary of federal grant terminology
+**Goal**: Generate useful draft summaries
 
-5. **Grant Database Integration**
-   - Search/filter grants by agency, amount, deadline
-   - Grant opportunity alerts
-   - Saved searches functionality
+- [ ] Claude API integration
+- [ ] Prompt engineering for grant summaries:
+  - Deadline and key dates
+  - Funding amount/range
+  - Eligibility requirements (who can apply)
+  - Brief description of what's funded
+  - Direct link to opportunity
+- [ ] Output format suitable for newsletter
 
-6. **User Accounts**
-   - User registration and profiles
-   - Bookmark/save articles
-   - Personalized grant recommendations
+**Deliverable**: Script that takes grant data → outputs draft newsletter content
 
-### Phase 3: Premium Features
+### Phase 3: Review Workflow (Week 4-5)
 
-7. **Premium Content & Subscriptions**
-   - Gated premium articles
-   - Subscription tiers
-   - Payment processing integration
+**Goal**: Efficient human review process
 
-8. **Interactive Tools**
-   - Grant eligibility quiz
-   - Budget calculator
-   - Timeline planner
+- [ ] Simple review interface (Notion database, Google Doc, or basic CLI tool)
+- [ ] Ability to edit/approve/reject each item
+- [ ] Track what's been published
 
-9. **Community Features**
-   - Comments and discussions
-   - Expert Q&A sections
-   - Webinar/event listings
+**Deliverable**: Workflow where you can review 10-20 grants in 30 minutes
+
+### Phase 4: Publishing (Week 6-7)
+
+**Goal**: Automated publishing to Beehiiv
+
+- [ ] Beehiiv account setup and API access
+- [ ] Newsletter template design
+- [ ] API integration to create/schedule posts
+- [ ] End-to-end test of full pipeline
+
+**Deliverable**: One-command publish from approved content to Beehiiv
 
 ---
 
-## Technical Architecture
-
-### Recommended Tech Stack
-
-#### Option A: Modern JAMstack (Recommended for Content-Heavy Sites)
-- **Frontend**: Next.js (React) with TypeScript
-- **CMS**: Headless CMS (Strapi, Sanity, or Contentful)
-- **Database**: PostgreSQL
-- **Hosting**: Vercel or Netlify
-- **Search**: Algolia or Elasticsearch
-
-#### Option B: Traditional Full-Stack
-- **Framework**: Django (Python) or Ruby on Rails
-- **Database**: PostgreSQL
-- **Frontend**: Server-rendered templates + React components
-- **Hosting**: AWS, DigitalOcean, or Heroku
-
-#### Option C: WordPress-Based
-- **Platform**: WordPress with custom theme
-- **Plugins**: ACF, Yoast SEO, WooCommerce (for subscriptions)
-- **Hosting**: WP Engine or Kinsta
-
-### Supporting Services
-- **Email**: SendGrid or Mailchimp for newsletters
-- **Analytics**: Google Analytics, Plausible, or Mixpanel
-- **CDN**: Cloudflare
-- **Monitoring**: Sentry for error tracking
-
----
-
-## Content Strategy
-
-### Content Types
-
-1. **Educational Articles**
-   - "How to Apply for Federal Grants"
-   - "Understanding the Grants.gov Application Process"
-   - Agency-specific guides
-
-2. **News & Updates**
-   - New grant opportunities
-   - Policy changes affecting grants
-   - Deadline reminders
-
-3. **Success Stories**
-   - Case studies of successful grant recipients
-   - Interviews with grant professionals
-
-4. **Practical Resources**
-   - Templates and worksheets
-   - Video tutorials
-   - Infographics
-
-### SEO Focus Keywords
-- Federal grants
-- Government funding
-- Grant writing
-- Grants.gov help
-- [Agency] grants (NIH, NSF, DOE, etc.)
-- Small business grants
-- Nonprofit funding
-
----
-
-## Project Structure (Proposed)
+## Project Structure
 
 ```
 turbo-disco/
 ├── README.md
 ├── PLAN.md
-├── docs/
-│   ├── architecture.md
-│   ├── content-guidelines.md
-│   └── api-specs.md
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── styles/
-│   │   └── utils/
-│   ├── public/
-│   └── package.json
-├── backend/
-│   ├── src/
-│   │   ├── api/
-│   │   ├── models/
-│   │   ├── services/
-│   │   └── utils/
-│   └── package.json
-├── cms/
-│   └── (headless CMS config)
-├── database/
-│   └── migrations/
-└── infrastructure/
-    ├── docker/
-    └── terraform/
+├── src/
+│   ├── grants/
+│   │   ├── fetch.py          # Grants.gov API client
+│   │   ├── filter.py         # CFDA code filtering
+│   │   └── models.py         # Grant data structures
+│   ├── summarize/
+│   │   ├── claude_client.py  # Claude API wrapper
+│   │   └── prompts.py        # Prompt templates
+│   ├── publish/
+│   │   └── beehiiv.py        # Beehiiv API client
+│   └── review/
+│       └── workflow.py       # Review interface
+├── data/
+│   └── grants.db             # Local SQLite for tracking
+├── config/
+│   ├── cfda_codes.yaml       # Target grant programs
+│   └── settings.py           # API keys, config
+├── scripts/
+│   ├── daily_fetch.py        # Cron job entry point
+│   └── publish.py            # Manual publish trigger
+└── requirements.txt
 ```
 
 ---
 
-## Development Milestones
+## Key CFDA Codes to Track
 
-### Milestone 1: Project Setup
-- [ ] Finalize tech stack decision
-- [ ] Set up development environment
-- [ ] Initialize frontend and backend projects
-- [ ] Configure CI/CD pipeline
-- [ ] Set up staging and production environments
+| Code | Agency | Program |
+|------|--------|---------|
+| 81.086 | DOE | Conservation Research and Development |
+| 81.087 | DOE | Renewable Energy Research and Development |
+| 81.089 | DOE | Fossil Energy Research and Development |
+| 81.117 | DOE | Energy Efficiency and Renewable Energy Information Dissemination |
+| 81.119 | DOE | State Energy Program |
+| 81.041 | DOE | State Energy Program |
+| 66.039 | EPA | National Clean Diesel Emissions Reduction Program |
+| 66.045 | EPA | Climate Pollution Reduction Grants |
+| 10.868 | USDA | Rural Energy for America Program |
 
-### Milestone 2: Core Blog Functionality
-- [ ] Design and implement blog layout
-- [ ] Create article/post model and API
-- [ ] Build content editor integration
-- [ ] Implement categories and tags
-- [ ] Add search functionality
-- [ ] SEO optimization (meta tags, sitemaps)
-
-### Milestone 3: Grant Resources
-- [ ] Create grant information pages
-- [ ] Build agency directory
-- [ ] Implement deadline tracking
-- [ ] Add resource download functionality
-
-### Milestone 4: User Features
-- [ ] Newsletter signup and integration
-- [ ] Contact form with email notifications
-- [ ] Social sharing buttons
-- [ ] User authentication system
-
-### Milestone 5: Enhanced Features
-- [ ] Grant database integration
-- [ ] User profiles and preferences
-- [ ] Saved articles/bookmarks
-- [ ] Alert/notification system
-
-### Milestone 6: Monetization
-- [ ] Premium content gates
-- [ ] Subscription management
-- [ ] Payment processing
-- [ ] Analytics dashboard
+*Expand this list based on research*
 
 ---
 
-## Key Decisions Needed
+## Success Metrics
 
-1. **Tech Stack Selection**: Which option (A, B, or C) best fits the team's skills and project needs?
+| Milestone | Target |
+|-----------|--------|
+| Pipeline working | End of Week 3 |
+| First newsletter sent | End of Week 7 |
+| 500 subscribers | Month 3 |
+| 2,000 subscribers | Month 6 |
+| First paid tier test | After 2,000 subscribers |
 
-2. **CMS Choice**: Self-hosted (Strapi) vs. managed (Contentful/Sanity)?
+---
 
-3. **Grant Data Source**:
-   - Manual curation only?
-   - Grants.gov API integration?
-   - Third-party data provider?
+## What This Is NOT (Yet)
 
-4. **Monetization Model**:
-   - Freemium with premium articles?
-   - Subscription tiers?
-   - One-time purchases?
-   - Advertising?
+- Custom web application
+- User accounts and authentication
+- Payment processing
+- Searchable database
+- Interactive tools
+- Multiple content formats
 
-5. **MVP Scope**: Which Phase 1 features are truly essential for launch?
+These come **after** proving demand with 2,000+ subscribers.
 
 ---
 
 ## Next Steps
 
-1. Review this plan and provide feedback
-2. Make key technical decisions (see above)
-3. Create detailed user stories/requirements
-4. Design wireframes and mockups
-5. Begin development setup
+1. Set up Python project structure
+2. Get Grants.gov API access
+3. Research and finalize CFDA code list
+4. Build initial fetch script
 
 ---
 
