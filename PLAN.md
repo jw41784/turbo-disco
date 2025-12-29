@@ -207,6 +207,8 @@ This week's featured grants for context:
 
 **Goal**: Automated publishing with error handling
 
+**Beehiiv API docs**: https://developers.beehiiv.com/docs/v2
+
 - [ ] Beehiiv account setup and API access
 - [ ] Newsletter template matching format spec above
 - [ ] API integration to create/schedule posts
@@ -302,7 +304,6 @@ turbo-disco/
 ### Other Agencies
 | Code | Agency | Program |
 |------|--------|---------|
-| 11.474 | DOC/NOAA | Atlantic Coastal Fisheries Cooperative Management |
 | 15.XXX | DOI | Various climate/conservation programs |
 | 20.XXX | DOT | EV infrastructure programs |
 
