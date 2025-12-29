@@ -4,25 +4,45 @@
 
 A curated newsletter delivering clean energy and climate grant opportunities to subscribers. AI handles the data processing; you provide editorial judgment.
 
-**Platform**: Beehiiv (~$100/month)
-**Time commitment**: ~45 min/day
-**Niche**: Clean energy and climate grants (CFDA codes 81.xxx, specific EPA/USDA programs)
+**Platform**: Beehiiv
+**Time commitment**: ~45 min per issue
+**Niche**: Clean energy and climate grants (DOE, EPA, USDA programs)
+
+---
+
+## Publishing Cadence
+
+**Start**: Weekly (every Monday)
+**Upgrade to 2x/week**: After 1,000 subscribers and stable workflow
+**Upgrade to daily**: After 2,000 subscribers (if volume justifies it)
+
+---
+
+## Estimated Monthly Costs
+
+| Item | Cost |
+|------|------|
+| Beehiiv Scale plan | $49 |
+| Claude API (~50K tokens/week) | $15-30 |
+| Server (if needed for cron) | $5-10 |
+| **Total** | **~$70-90/month** |
 
 ---
 
 ## Core Workflow
 
 ```
-Grants.gov API → Python scripts → Filter by CFDA codes → Claude API drafts summaries → You review/edit → Beehiiv API publishes
+Grants.gov API → Python scripts → Filter (CFDA + keywords) → Dedupe → Claude API drafts → CLI review → Beehiiv API publishes
 ```
 
-### Daily Process
+### Weekly Process
 
 1. **Automated**: Scripts pull new/updated grants from Grants.gov
-2. **Automated**: Filter to clean energy/climate programs
-3. **Automated**: Claude generates draft summaries (key dates, eligibility, amounts)
-4. **Manual (~30 min)**: Review drafts, add editorial insight, catch errors
-5. **Automated**: Publish to Beehiiv via API
+2. **Automated**: Filter by CFDA codes and keyword matching
+3. **Automated**: Deduplicate against previously processed grants
+4. **Automated**: Claude generates draft summaries
+5. **Manual (~30 min)**: Review drafts in CLI, approve/edit/skip
+6. **Automated**: Publish approved content to Beehiiv via API
 
 ---
 
@@ -39,53 +59,168 @@ Organizations pursuing clean energy and climate funding:
 
 ---
 
+## Newsletter Format
+
+### Issue Structure
+
+Each weekly issue contains:
+
+1. **Header**: Issue number, date, one-line hook
+2. **Featured Opportunity** (1): Biggest/most notable grant that week, 150-200 words
+3. **New Opportunities** (3-5): New grants with summaries, 75-100 words each
+4. **Deadline Alerts** (2-3): Grants closing in next 14 days
+5. **Quick Hits** (3-5): One-liner mentions of smaller or niche opportunities
+6. **Tip of the Week**: One actionable grant-writing or compliance tip
+7. **Footer**: Unsubscribe, feedback link, social links
+
+### Subject Line Format
+
+```
+[Clean Energy Grants] {Featured Opportunity Name} + {X} new opportunities
+```
+
+Example: `[Clean Energy Grants] $50M DOE Hydrogen Hub + 7 new opportunities`
+
+### Per-Grant Summary Format
+
+```
+**{Grant Title}**
+Agency: {Agency} | Deadline: {Date} | Amount: {Range}
+
+{2-3 sentence description: what it funds, who's eligible, why it matters}
+
+→ [Apply here]({link})
+```
+
+---
+
 ## Development Phases
 
 ### Phase 1: Data Pipeline (Week 1-3)
 
-**Goal**: Reliably pull and filter grant data
+**Goal**: Reliably pull, filter, and deduplicate grant data
 
 - [ ] Set up Grants.gov API access
-- [ ] Identify relevant CFDA codes (DOE 81.xxx, EPA climate programs, USDA rural energy)
-- [ ] Build Python script to fetch new/modified grants daily
-- [ ] Filter logic for clean energy relevance
-- [ ] Store results (simple JSON or SQLite)
+- [ ] Build Python script to fetch new/modified grants
+- [ ] Filter logic: CFDA codes + keyword matching
+- [ ] SQLite database for tracking:
+  - [ ] Store grant IDs already processed
+  - [ ] Detect: new grant vs. updated grant vs. no change
+  - [ ] Only surface new grants OR significant updates (deadline change, amount change, eligibility change)
+- [ ] Hash grant content to detect meaningful changes vs. trivial updates
 
-**Deliverable**: Script that outputs today's relevant grants as structured data
+**Deliverable**: Script that outputs this week's relevant NEW grants as structured data
+
+**Deduplication Rules**:
+- New opportunity ID → always include
+- Same ID, deadline changed → include with "UPDATED" flag
+- Same ID, amount changed → include with "UPDATED" flag
+- Same ID, minor text changes only → skip
 
 ### Phase 2: AI Summarization (Week 2-3)
 
-**Goal**: Generate useful draft summaries
+**Goal**: Generate useful draft summaries using tested prompts
 
 - [ ] Claude API integration
-- [ ] Prompt engineering for grant summaries:
-  - Deadline and key dates
-  - Funding amount/range
-  - Eligibility requirements (who can apply)
-  - Brief description of what's funded
-  - Direct link to opportunity
-- [ ] Output format suitable for newsletter
+- [ ] Implement prompt templates (see below)
+- [ ] Output format matching newsletter structure
+- [ ] Batch processing for efficiency
 
 **Deliverable**: Script that takes grant data → outputs draft newsletter content
 
+#### Prompt Templates
+
+**Grant Summary Prompt**:
+```
+You are writing for a newsletter about clean energy and climate grants.
+Your audience is grant professionals at startups, nonprofits, and universities.
+
+Summarize this grant opportunity in 75-100 words. Include:
+1. What activities/projects it funds (be specific)
+2. Who is eligible (organization types, any restrictions)
+3. Why this matters or what makes it notable
+
+Write in a direct, professional tone. No hype or exclamation points.
+Assume readers understand grant basics—don't explain what a NOFO is.
+
+Grant data:
+{grant_json}
+```
+
+**Featured Opportunity Prompt** (for the lead story):
+```
+You are writing the featured story for a clean energy grants newsletter.
+This is the most important opportunity of the week.
+
+Write 150-200 words covering:
+1. What this grant funds and why it's significant
+2. Funding amount and timeline
+3. Who should apply (be specific about ideal applicants)
+4. One concrete tip for a strong application
+5. Key deadline
+
+Grant data:
+{grant_json}
+```
+
+**Deadline Alert Prompt**:
+```
+Write a 2-sentence deadline alert for this grant.
+First sentence: what it funds and amount.
+Second sentence: deadline and one key eligibility point.
+
+Grant data:
+{grant_json}
+```
+
+**Tip of the Week Prompt**:
+```
+Generate one actionable grant-writing tip relevant to clean energy/climate grants.
+Keep it to 2-3 sentences. Be specific and practical, not generic advice.
+Example topics: budget justification, letters of support, compliance requirements,
+common mistakes, agency-specific preferences.
+
+This week's featured grants for context:
+{grant_titles}
+```
+
 ### Phase 3: Review Workflow (Week 4-5)
 
-**Goal**: Efficient human review process
+**Goal**: Efficient CLI-based human review
 
-- [ ] Simple review interface (Notion database, Google Doc, or basic CLI tool)
-- [ ] Ability to edit/approve/reject each item
-- [ ] Track what's been published
+**Interface**: Command-line tool (fastest for daily use)
 
-**Deliverable**: Workflow where you can review 10-20 grants in 30 minutes
+- [ ] Display each grant summary with full context
+- [ ] Keyboard commands:
+  - `a` = approve as-is
+  - `e` = edit (opens in $EDITOR)
+  - `s` = skip (don't include this week)
+  - `f` = flag for featured slot
+  - `q` = quit and save progress
+- [ ] Show running count: "Approved: 5 | Skipped: 2 | Remaining: 8"
+- [ ] Save review state (can quit and resume)
+- [ ] Track which grants have been published (prevent duplicates across issues)
 
-### Phase 4: Publishing (Week 6-7)
+**Deliverable**: Review 15-20 grants in 30 minutes or less
 
-**Goal**: Automated publishing to Beehiiv
+### Phase 4: Publishing & Operations (Week 6-7)
+
+**Goal**: Automated publishing with error handling
 
 - [ ] Beehiiv account setup and API access
-- [ ] Newsletter template design
+- [ ] Newsletter template matching format spec above
 - [ ] API integration to create/schedule posts
 - [ ] End-to-end test of full pipeline
+
+**Error Handling**:
+- [ ] Retry logic for API failures (3 attempts with exponential backoff)
+- [ ] Logging to file for debugging
+- [ ] Alert on failure: email or Slack webhook if daily run fails
+- [ ] Graceful degradation: if Claude API fails, save raw grants for manual processing
+
+**Monitoring**:
+- [ ] Log each run: grants fetched, filtered, summarized, published
+- [ ] Weekly summary: total grants processed, approval rate, any errors
 
 **Deliverable**: One-command publish from approved content to Beehiiv
 
@@ -100,43 +235,115 @@ turbo-disco/
 ├── src/
 │   ├── grants/
 │   │   ├── fetch.py          # Grants.gov API client
-│   │   ├── filter.py         # CFDA code filtering
+│   │   ├── filter.py         # CFDA + keyword filtering
+│   │   ├── dedupe.py         # Deduplication logic
 │   │   └── models.py         # Grant data structures
 │   ├── summarize/
 │   │   ├── claude_client.py  # Claude API wrapper
-│   │   └── prompts.py        # Prompt templates
+│   │   └── prompts.py        # Prompt templates (from above)
 │   ├── publish/
 │   │   └── beehiiv.py        # Beehiiv API client
-│   └── review/
-│       └── workflow.py       # Review interface
+│   ├── review/
+│   │   └── cli.py            # CLI review interface
+│   └── utils/
+│       ├── logging.py        # Logging setup
+│       └── alerts.py         # Failure notifications
 ├── data/
-│   └── grants.db             # Local SQLite for tracking
+│   └── grants.db             # SQLite: processed grants, review state
 ├── config/
-│   ├── cfda_codes.yaml       # Target grant programs
+│   ├── cfda_codes.yaml       # Target CFDA codes
+│   ├── keywords.yaml         # Keyword filters
 │   └── settings.py           # API keys, config
 ├── scripts/
-│   ├── daily_fetch.py        # Cron job entry point
-│   └── publish.py            # Manual publish trigger
+│   ├── weekly_fetch.py       # Cron job entry point
+│   ├── review.py             # Launch CLI review
+│   └── publish.py            # Publish approved content
+├── logs/
+│   └── .gitkeep
 └── requirements.txt
 ```
 
 ---
 
-## Key CFDA Codes to Track
+## CFDA Codes to Track
 
+### Department of Energy (DOE)
+| Code | Program |
+|------|---------|
+| 81.086 | Conservation Research and Development |
+| 81.087 | Renewable Energy Research and Development |
+| 81.089 | Fossil Energy Research and Development |
+| 81.117 | Energy Efficiency and Renewable Energy Information Dissemination |
+| 81.119 | State Energy Program Special Projects |
+| 81.122 | Electricity Research, Development and Analysis |
+| 81.135 | ARPA-E (Advanced Research Projects Agency - Energy) |
+| 81.041 | State Energy Program |
+| 81.128 | Energy Efficiency and Conservation Block Grant |
+| 81.138 | Reducing Embodied Greenhouse Gas Emissions |
+| 81.140 | Clean Hydrogen Manufacturing, Recycling, and Electrolysis |
+| 81.141 | Industrial Decarbonization |
+
+### Environmental Protection Agency (EPA)
+| Code | Program |
+|------|---------|
+| 66.039 | National Clean Diesel Emissions Reduction Program |
+| 66.045 | Climate Pollution Reduction Grants |
+| 66.956 | Targeted Air Shed Grants |
+| 66.046 | Greenhouse Gas Reporting Program |
+| 66.042 | Temporally Integrated Monitoring of Ecosystems (TIME) |
+
+### Department of Agriculture (USDA)
+| Code | Program |
+|------|---------|
+| 10.868 | Rural Energy for America Program (REAP) |
+| 10.867 | Bioenergy Program for Advanced Biofuels |
+| 10.865 | Biorefinery Assistance |
+
+### Other Agencies
 | Code | Agency | Program |
 |------|--------|---------|
-| 81.086 | DOE | Conservation Research and Development |
-| 81.087 | DOE | Renewable Energy Research and Development |
-| 81.089 | DOE | Fossil Energy Research and Development |
-| 81.117 | DOE | Energy Efficiency and Renewable Energy Information Dissemination |
-| 81.119 | DOE | State Energy Program |
-| 81.041 | DOE | State Energy Program |
-| 66.039 | EPA | National Clean Diesel Emissions Reduction Program |
-| 66.045 | EPA | Climate Pollution Reduction Grants |
-| 10.868 | USDA | Rural Energy for America Program |
+| 11.474 | DOC/NOAA | Atlantic Coastal Fisheries Cooperative Management |
+| 15.XXX | DOI | Various climate/conservation programs |
+| 20.XXX | DOT | EV infrastructure programs |
 
-*Expand this list based on research*
+*Review and expand based on IRA/IIJA program announcements*
+
+---
+
+## Keyword Filters (Supplement to CFDA)
+
+Match grants containing these terms (case-insensitive):
+
+### Primary Keywords (high confidence)
+- clean energy
+- renewable energy
+- solar
+- wind energy
+- energy storage
+- battery storage
+- clean hydrogen
+- EV charging
+- electric vehicle infrastructure
+- decarbonization
+- carbon capture
+- energy efficiency
+- grid modernization
+- climate resilience
+
+### Secondary Keywords (review manually)
+- sustainability
+- greenhouse gas
+- emissions reduction
+- weatherization
+- building electrification
+- heat pump
+- offshore wind
+- geothermal
+- hydropower
+- nuclear energy
+- smart grid
+- distributed energy
+- microgrid
 
 ---
 
@@ -167,10 +374,11 @@ These come **after** proving demand with 2,000+ subscribers.
 
 ## Next Steps
 
-1. Set up Python project structure
-2. Get Grants.gov API access
-3. Research and finalize CFDA code list
-4. Build initial fetch script
+1. Set up Python project structure with dependencies
+2. Get Grants.gov API access (register at grants.gov)
+3. Create SQLite schema for grant tracking
+4. Build initial fetch + filter script
+5. Test with one week of data
 
 ---
 
