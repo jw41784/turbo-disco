@@ -269,45 +269,86 @@ turbo-disco/
 
 ## CFDA Codes to Track
 
-### Department of Energy (DOE)
-| Code | Program |
-|------|---------|
-| 81.086 | Conservation Research and Development |
-| 81.087 | Renewable Energy Research and Development |
-| 81.089 | Fossil Energy Research and Development |
-| 81.117 | Energy Efficiency and Renewable Energy Information Dissemination |
-| 81.119 | State Energy Program Special Projects |
-| 81.122 | Electricity Research, Development and Analysis |
-| 81.135 | ARPA-E (Advanced Research Projects Agency - Energy) |
-| 81.041 | State Energy Program |
-| 81.128 | Energy Efficiency and Conservation Block Grant |
-| 81.138 | Reducing Embodied Greenhouse Gas Emissions |
-| 81.140 | Clean Hydrogen Manufacturing, Recycling, and Electrolysis |
-| 81.141 | Industrial Decarbonization |
+### Department of Energy (DOE 81.xxx)
 
-### Environmental Protection Agency (EPA)
+| Code | Program | Notes |
+|------|---------|-------|
+| 81.041 | State Energy Program | Core program |
+| 81.042 | Weatherization Assistance for Low-Income Persons | Major ongoing program |
+| 81.086 | Conservation Research and Development | |
+| 81.087 | Renewable Energy Research and Development | |
+| 81.089 | Fossil Energy Research and Development | Carbon capture focus |
+| 81.117 | Energy Efficiency and Renewable Energy Information Dissemination | |
+| 81.119 | State Energy Program Special Projects | |
+| 81.122 | Electricity Research, Development and Analysis | Grid modernization |
+| 81.124 | Tribal Energy Development Capacity | Tribal clean energy |
+| 81.126 | Federal Energy Regulatory Improvements | Grid modernization |
+| 81.127 | Energy Efficient Appliance Rebate Program | State rebate programs |
+| 81.128 | Energy Efficiency and Conservation Block Grant (EECBG) | Revived under BIL/IRA |
+| 81.129 | Energy Efficiency and Renewable Energy Technology Application | Deployment programs |
+| 81.135 | ARPA-E | Often biggest DOE opportunities |
+| 81.138 | State Assistance for High Energy Cost Areas | Rural/remote energy |
+| 81.140 | Clean Hydrogen Manufacturing, Recycling, and Electrolysis | IRA program |
+| 81.141 | Industrial Decarbonization | IRA program |
+| 81.250 | Energy Policy and Systems Analysis | Grid planning |
+
+### Environmental Protection Agency (EPA 66.xxx)
+
+**IRA-Funded Programs (Major - $40B+ total)**
+
+| Code | Program | Funding |
+|------|---------|---------|
+| 66.046 | Climate Pollution Reduction Grants | $5B IRA |
+| 66.047 | Greenhouse Gas Reduction Fund | $27B IRA (green bank) |
+| 66.048 | Environmental and Climate Justice Block Grants | $3B IRA, community-focused |
+| 66.049 | Grants to Reduce Air Pollution at Ports | $3B IRA, port electrification |
+| 66.050 | Clean Heavy-Duty Vehicles | $1B IRA, fleet electrification |
+| 66.051 | Methane Emissions Reduction Program | $1.55B IRA |
+
+**Other EPA Programs**
+
 | Code | Program |
 |------|---------|
-| 66.039 | National Clean Diesel Emissions Reduction Program |
+| 66.039 | National Clean Diesel Funding Assistance |
 | 66.045 | Climate Pollution Reduction Grants |
 | 66.956 | Targeted Air Shed Grants |
-| 66.046 | Greenhouse Gas Reporting Program |
-| 66.042 | Temporally Integrated Monitoring of Ecosystems (TIME) |
 
-### Department of Agriculture (USDA)
-| Code | Program |
-|------|---------|
-| 10.868 | Rural Energy for America Program (REAP) |
-| 10.867 | Bioenergy Program for Advanced Biofuels |
-| 10.865 | Biorefinery Assistance |
+### Department of Agriculture (USDA 10.xxx)
 
-### Other Agencies
-| Code | Agency | Program |
-|------|--------|---------|
-| 15.XXX | DOI | Various climate/conservation programs |
-| 20.XXX | DOT | EV infrastructure programs |
+| Code | Program | Notes |
+|------|---------|-------|
+| 10.865 | Biorefinery Assistance | |
+| 10.866 | Repowering Assistance | Bioenergy for biorefineries |
+| 10.867 | Bioenergy Program for Advanced Biofuels | Biofuel production |
+| 10.868 | Rural Energy for America Program (REAP) | Major program |
+| 10.870 | Rural Business Investment Program | Clean energy businesses |
+| 10.881 | Powering Affordable Clean Energy (PACE) | IRA program, rural utilities |
+| 10.884 | Empowering Rural America (New ERA) | $9.7B IRA, rural electric co-ops |
+| 10.885 | Higher Blends Infrastructure Incentive | Biofuel infrastructure |
 
-*Review and expand based on IRA/IIJA program announcements*
+### Department of Transportation (DOT 20.xxx)
+
+| Code | Program | Notes |
+|------|---------|-------|
+| 20.525 | State of Good Repair | Transit electrification |
+| 20.526 | Bus and Bus Facilities / Low or No Emissions | Electric buses |
+| 20.941 | SMART Grants | Technology pilots |
+| 20.942 | NEVI Formula Program | EV charging infrastructure |
+
+### Department of the Interior (DOI 15.xxx)
+
+| Code | Program | Notes |
+|------|---------|-------|
+| 15.148 | Tribal Energy Development | Energy projects on tribal lands |
+| 15.875 | Economic Development of Territories | Clean energy in PR, USVI, Guam |
+
+### Department of Commerce (DOC 11.xxx)
+
+| Code | Program | Notes |
+|------|---------|-------|
+| 11.300 | EDA Public Works | Clean energy infrastructure |
+| 11.307 | EDA Economic Adjustment Assistance | Energy transition communities |
+| 11.549 | NOAA Climate Program Office | Climate resilience |
 
 ---
 
