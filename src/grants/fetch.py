@@ -1,8 +1,8 @@
 """
 Grants.gov API client for fetching grant opportunities.
 
-API Documentation: https://www.grants.gov/web/grants/s2s/applicant/schemas/grants-funding-synopsis.html
-Search API: https://www.grants.gov/grantsws/rest/opportunities/search
+Public Search API: https://api.grants.gov/v1/api/search2
+No authentication required.
 """
 
 import logging
@@ -18,24 +18,14 @@ logger = logging.getLogger(__name__)
 
 
 class GrantsGovClient:
-    """Client for Grants.gov REST API."""
+    """Client for Grants.gov public REST API."""
 
-    BASE_URL = "https://www.grants.gov/grantsws/rest/opportunities/search"
+    BASE_URL = "https://api.grants.gov/v1/api/search2"
 
-    # Opportunity statuses we care about
-    ACTIVE_STATUSES = ["posted", "forecasted"]
-
-    def __init__(self, api_key: Optional[str] = None):
-        """
-        Initialize client.
-
-        Note: Grants.gov search API may not require an API key for basic searches.
-        The API key is used for higher rate limits and S2S operations.
-        """
-        self.api_key = api_key
+    def __init__(self):
+        """Initialize client. No API key required for public search endpoint."""
         self.session = requests.Session()
-        if api_key:
-            self.session.headers["X-API-KEY"] = api_key
+        self.session.headers["Content-Type"] = "application/json"
 
     def search(
         self,
@@ -43,9 +33,9 @@ class GrantsGovClient:
         posted_to: Optional[datetime] = None,
         cfda_numbers: Optional[list[str]] = None,
         keyword: Optional[str] = None,
-        rows: int = 100,
-        start_record: int = 0,
-    ) -> list[Grant]:
+        rows: int = 25,
+        page: int = 1,
+    ) -> tuple[list[Grant], int]:
         """
         Search for grant opportunities.
 
@@ -54,37 +44,48 @@ class GrantsGovClient:
             posted_to: End date for posted date filter
             cfda_numbers: List of CFDA numbers to filter by
             keyword: Keyword search term
-            rows: Number of results per request (max 100)
-            start_record: Starting record for pagination
+            rows: Number of results per request (max 25 for this API)
+            page: Page number (1-indexed)
 
         Returns:
-            List of Grant objects
+            Tuple of (list of Grant objects, total count)
         """
-        params = {
-            "rows": min(rows, 100),
-            "startRecord": start_record,
-            "sortBy": "postedDate|desc",
-            "oppStatus": "posted",  # Only active opportunities
+        # Build request body for POST
+        body = {
+            "paging": {
+                "pageNumber": page,
+                "pageSize": min(rows, 25),
+                "sortOrder": "DESC",
+                "orderBy": "postedDate"
+            },
+            "status": "posted"  # Only active opportunities
         }
 
+        # Date filters
         if posted_from:
-            params["postedFrom"] = posted_from.strftime("%m/%d/%Y")
+            body["postedFrom"] = posted_from.strftime("%Y-%m-%d")
         if posted_to:
-            params["postedTo"] = posted_to.strftime("%m/%d/%Y")
+            body["postedTo"] = posted_to.strftime("%Y-%m-%d")
+
+        # CFDA filter
         if cfda_numbers:
-            params["cfda"] = ",".join(cfda_numbers)
+            body["assistanceListingNumber"] = cfda_numbers
+
+        # Keyword search
         if keyword:
-            params["keyword"] = keyword
+            body["keyword"] = keyword
 
         try:
-            response = self.session.get(self.BASE_URL, params=params, timeout=30)
+            response = self.session.post(self.BASE_URL, json=body, timeout=30)
             response.raise_for_status()
             data = response.json()
         except requests.exceptions.RequestException as e:
             logger.error(f"API request failed: {e}")
             raise
 
-        opportunities = data.get("oppHits", [])
+        # Parse response - adjust field names based on actual API response
+        opportunities = data.get("opportunities", data.get("oppHits", []))
+        total_count = data.get("totalCount", data.get("total", 0))
         grants = []
 
         for opp in opportunities:
@@ -92,10 +93,10 @@ class GrantsGovClient:
                 grant = Grant.from_api_response(opp)
                 grants.append(grant)
             except Exception as e:
-                logger.warning(f"Failed to parse opportunity {opp.get('opportunityId')}: {e}")
+                logger.warning(f"Failed to parse opportunity {opp.get('opportunityId', opp.get('id'))}: {e}")
 
-        logger.info(f"Fetched {len(grants)} grants (total hits: {data.get('totalCount', 0)})")
-        return grants
+        logger.info(f"Fetched {len(grants)} grants (page {page}, total: {total_count})")
+        return grants, total_count
 
     def fetch_recent(self, days_back: int = 7) -> list[Grant]:
         """
@@ -107,28 +108,33 @@ class GrantsGovClient:
         posted_to = datetime.now()
 
         all_grants = []
-        start_record = 0
-        rows_per_page = 100
+        page = 1
+        rows_per_page = 25
 
         while True:
-            grants = self.search(
+            grants, total_count = self.search(
                 posted_from=posted_from,
                 posted_to=posted_to,
                 rows=rows_per_page,
-                start_record=start_record,
+                page=page,
             )
 
             if not grants:
                 break
 
             all_grants.extend(grants)
-            start_record += rows_per_page
+
+            # Check if we've fetched all
+            if len(all_grants) >= total_count:
+                break
+
+            page += 1
 
             # Rate limiting - be nice to the API
-            time.sleep(0.5)
+            time.sleep(0.3)
 
             # Safety limit
-            if start_record > 10000:
+            if page > 400:  # 400 pages * 25 = 10,000 records
                 logger.warning("Hit pagination safety limit at 10,000 records")
                 break
 
@@ -150,26 +156,30 @@ class GrantsGovClient:
             batch = cfda_codes[i:i + batch_size]
             logger.info(f"Fetching grants for CFDA codes: {batch}")
 
-            start_record = 0
+            page = 1
             while True:
-                grants = self.search(
+                grants, total_count = self.search(
                     posted_from=posted_from,
                     cfda_numbers=batch,
-                    rows=100,
-                    start_record=start_record,
+                    rows=25,
+                    page=page,
                 )
 
                 if not grants:
                     break
 
                 all_grants.extend(grants)
-                start_record += 100
-                time.sleep(0.5)
 
-                if start_record > 5000:
+                if len(grants) < 25 or page * 25 >= total_count:
                     break
 
-            time.sleep(1)  # Pause between batches
+                page += 1
+                time.sleep(0.3)
+
+                if page > 200:
+                    break
+
+            time.sleep(0.5)  # Pause between batches
 
         # Deduplicate by opportunity_id (same grant might match multiple CFDA codes)
         seen = set()

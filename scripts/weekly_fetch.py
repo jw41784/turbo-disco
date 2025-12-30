@@ -23,7 +23,6 @@ from src.grants.dedupe import GrantDeduplicator
 from src.grants.models import GrantDatabase
 from src.utils.logging import setup_logging
 from config.settings import (
-    GRANTS_GOV_API_KEY,
     DATABASE_PATH,
     LOGS_DIR,
     CONFIG_DIR,
@@ -61,13 +60,9 @@ def main():
     logger.info(f"Looking back {args.days} days")
     logger.info("=" * 60)
 
-    # Check for API key
-    if not GRANTS_GOV_API_KEY:
-        logger.warning("No GRANTS_GOV_API_KEY set - using public API (may have rate limits)")
-
     try:
         # Initialize components
-        client = GrantsGovClient(api_key=GRANTS_GOV_API_KEY or None)
+        client = GrantsGovClient()  # No API key needed for public endpoint
         filter_ = GrantFilter(config_dir=CONFIG_DIR)
         db = GrantDatabase(DATABASE_PATH)
         deduper = GrantDeduplicator(db)

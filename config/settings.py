@@ -20,10 +20,9 @@ LOGS_DIR = PROJECT_ROOT / "logs"
 # Database
 DATABASE_PATH = DATA_DIR / "grants.db"
 
-# Grants.gov API
-# Docs: https://www.grants.gov/web/grants/s2s/applicant/schemas/grants-funding-synopsis.html
-GRANTS_GOV_API_KEY = os.getenv("GRANTS_GOV_API_KEY", "")
-GRANTS_GOV_BASE_URL = "https://www.grants.gov/grantsws/rest/opportunities/search"
+# Grants.gov API (public, no key required)
+# Docs: https://api.grants.gov
+GRANTS_GOV_BASE_URL = "https://api.grants.gov/v1/api/search2"
 
 # Anthropic Claude API (Phase 2)
 # Docs: https://docs.anthropic.com/
