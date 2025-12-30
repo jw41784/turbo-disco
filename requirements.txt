@@ -2,7 +2,7 @@
 requests>=2.31.0
 
 # Database
-sqlite3 is built-in
+# sqlite3 is built-in (no install needed)
 
 # Configuration
 pyyaml>=6.0
