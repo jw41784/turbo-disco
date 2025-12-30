@@ -1,0 +1,18 @@
+# Grants.gov API
+requests>=2.31.0
+
+# Database
+sqlite3 is built-in
+
+# Configuration
+pyyaml>=6.0
+
+# Claude API (Phase 2)
+anthropic>=0.18.0
+
+# Beehiiv API (Phase 4)
+# No SDK - uses requests
+
+# Utilities
+python-dotenv>=1.0.0
+rich>=13.0.0  # For CLI display

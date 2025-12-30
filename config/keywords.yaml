@@ -1,0 +1,35 @@
+# Keyword filters for clean energy grants
+# Used to catch relevant grants that don't match CFDA codes
+
+# Primary keywords - high confidence, auto-include
+primary:
+  - "clean energy"
+  - "renewable energy"
+  - "solar"
+  - "wind energy"
+  - "energy storage"
+  - "battery storage"
+  - "clean hydrogen"
+  - "EV charging"
+  - "electric vehicle infrastructure"
+  - "decarbonization"
+  - "carbon capture"
+  - "energy efficiency"
+  - "grid modernization"
+  - "climate resilience"
+
+# Secondary keywords - flag for manual review
+secondary:
+  - "sustainability"
+  - "greenhouse gas"
+  - "emissions reduction"
+  - "weatherization"
+  - "building electrification"
+  - "heat pump"
+  - "offshore wind"
+  - "geothermal"
+  - "hydropower"
+  - "nuclear energy"
+  - "smart grid"
+  - "distributed energy"
+  - "microgrid"
