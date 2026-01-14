@@ -16,7 +16,8 @@ turbo-disco/
 │   └── settings.py         # API keys from .env, paths, constants
 ├── scripts/
 │   ├── weekly_fetch.py     # Phase 1 standalone script
-│   └── run_pipeline.py     # Full pipeline orchestration
+│   ├── run_pipeline.py     # Full pipeline orchestration
+│   └── generate_marketing.py # Marketing content generator
 ├── src/
 │   ├── grants/             # Phase 1: Data pipeline (COMPLETE)
 │   │   ├── fetch.py        # Grants.gov API client
@@ -32,11 +33,14 @@ turbo-disco/
 │   │   ├── approval.py     # Auto-approve by match type
 │   │   ├── reviewer.py     # Approval workflow
 │   │   └── cli.py          # Optional manual review
-│   └── publish/            # Phase 4: Beehiiv publishing (COMPLETE)
-│       ├── beehiiv.py      # Beehiiv API v2 client
-│       ├── composer.py     # Newsletter composition
-│       ├── templates.py    # HTML email templates
-│       └── scheduler.py    # Send time utilities
+│   ├── publish/            # Phase 4: Beehiiv publishing (COMPLETE)
+│   │   ├── beehiiv.py      # Beehiiv API v2 client
+│   │   ├── composer.py     # Newsletter composition
+│   │   ├── templates.py    # HTML email templates
+│   │   └── scheduler.py    # Send time utilities
+│   └── marketing/          # Phase 5: Marketing automation (COMPLETE)
+│       ├── linkedin.py     # LinkedIn post generation
+│       └── repurpose.py    # Content repurposing orchestrator
 ├── data/                   # SQLite database (gitignored)
 ├── logs/                   # Pipeline logs, draft HTML
 ├── .env                    # API keys (gitignored)
@@ -61,6 +65,12 @@ python scripts/run_pipeline.py --publish-now
 
 # Run with manual review of flagged grants
 python scripts/run_pipeline.py --review
+
+# Generate marketing content (LinkedIn posts, Twitter thread, blog)
+python scripts/generate_marketing.py --model haiku
+
+# Generate with custom output directory
+python scripts/generate_marketing.py --output ./marketing_posts
 ```
 
 ## Environment Variables (.env)
@@ -99,6 +109,7 @@ Grants.gov API
 | Phase 2: Summarization | ✅ Complete | Claude API integration |
 | Phase 3: Auto-Approval | ✅ Complete | CFDA/keyword-based approval |
 | Phase 4: Publishing | ✅ Complete | Beehiiv API integration |
+| Phase 5: Marketing | ✅ Complete | LinkedIn posts, Twitter, blog |
 | Weekly Automation | ⏳ Pending | Cron job setup |
 
 ## Next Steps
