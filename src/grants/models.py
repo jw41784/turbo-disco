@@ -72,20 +72,37 @@ class Grant:
     @classmethod
     def from_api_response(cls, data: dict) -> "Grant":
         """Create Grant from Grants.gov API response."""
+        # API uses 'id' and 'number' in search results
+        opp_id = str(data.get("id", data.get("opportunityId", "")))
+
+        # CFDA numbers come as a list in 'cfdaList' or string in 'cfdaNumbers'
+        cfda_list = data.get("cfdaList", [])
+        if not cfda_list and data.get("cfdaNumbers"):
+            cfda_list = data.get("cfdaNumbers", "").split(",")
+
+        # Date handling - API uses openDate/closeDate or postedDate
+        posted = data.get("openDate", data.get("postedDate", ""))
+        close = data.get("closeDate") or None
+
+        # Eligibility codes - may be list or comma-separated string
+        elig = data.get("eligibilityCodes", data.get("eligibilities", []))
+        if isinstance(elig, str):
+            elig = elig.split(",") if elig else []
+
         return cls(
-            opportunity_id=str(data.get("opportunityId", "")),
-            opportunity_number=data.get("opportunityNumber", ""),
-            title=data.get("opportunityTitle", ""),
-            agency=data.get("agencyName", ""),
-            cfda_numbers=data.get("cfdaNumbers", "").split(",") if data.get("cfdaNumbers") else [],
-            description=data.get("description", ""),
-            posted_date=data.get("postedDate", ""),
-            close_date=data.get("closeDate"),
+            opportunity_id=opp_id,
+            opportunity_number=data.get("number", data.get("opportunityNumber", "")),
+            title=data.get("title", data.get("opportunityTitle", "")),
+            agency=data.get("agency", data.get("agencyName", "")),
+            cfda_numbers=cfda_list,
+            description=data.get("description", data.get("synopsis", "")),
+            posted_date=posted,
+            close_date=close if close else None,
             award_floor=data.get("awardFloor"),
             award_ceiling=data.get("awardCeiling"),
             expected_awards=data.get("expectedNumberOfAwards"),
-            eligibility_codes=data.get("eligibilityCodes", "").split(",") if data.get("eligibilityCodes") else [],
-            url=f"https://www.grants.gov/search-results-detail/{data.get('opportunityId', '')}",
+            eligibility_codes=elig,
+            url=f"https://www.grants.gov/search-results-detail/{opp_id}",
         )
 
 
@@ -115,7 +132,10 @@ class GrantDatabase:
         last_updated_at TEXT,
         published_in_issue TEXT,
         summary TEXT,
-        notes TEXT
+        notes TEXT,
+        approval_confidence TEXT,
+        auto_approved_at TEXT,
+        reviewed_by TEXT
     );
 
     CREATE INDEX IF NOT EXISTS idx_status ON grants(status);
@@ -130,6 +150,18 @@ class GrantDatabase:
         grants_new INTEGER,
         grants_updated INTEGER,
         error TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS newsletter_issues (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        issue_date TEXT UNIQUE,
+        subject_line TEXT,
+        featured_id TEXT,
+        content_json TEXT,
+        status TEXT DEFAULT 'draft',
+        beehiiv_post_id TEXT,
+        created_at TEXT,
+        published_at TEXT
     );
     """
 

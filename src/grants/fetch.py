@@ -83,9 +83,10 @@ class GrantsGovClient:
             logger.error(f"API request failed: {e}")
             raise
 
-        # Parse response - adjust field names based on actual API response
-        opportunities = data.get("opportunities", data.get("oppHits", []))
-        total_count = data.get("totalCount", data.get("total", 0))
+        # Parse response - data is nested under 'data' key
+        inner_data = data.get("data", {})
+        opportunities = inner_data.get("oppHits", [])
+        total_count = inner_data.get("hitCount", 0)
         grants = []
 
         for opp in opportunities:
@@ -133,9 +134,9 @@ class GrantsGovClient:
             # Rate limiting - be nice to the API
             time.sleep(0.3)
 
-            # Safety limit
-            if page > 400:  # 400 pages * 25 = 10,000 records
-                logger.warning("Hit pagination safety limit at 10,000 records")
+            # Safety limit - can increase for production
+            if page > 100:  # 100 pages * 25 = 2,500 records
+                logger.warning("Hit pagination safety limit at 2,500 records")
                 break
 
         logger.info(f"Total grants fetched for last {days_back} days: {len(all_grants)}")
